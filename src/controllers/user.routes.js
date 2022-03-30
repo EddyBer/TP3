@@ -4,6 +4,7 @@ const userRepository = require('../models/user-repository');
 const guard = require('express-jwt-permissions')({
   permissionsProperty: 'roles',
 });
+const { body, validationResult } = require('express-validator');
 
 const adminRole = 'ADMIN';
 const adminOrMemberRoles = [[adminRole], ['MEMBER']];
@@ -22,7 +23,7 @@ router.get('/:firstName', guard.check(adminOrMemberRoles), (req, res) => {
   res.send(foundUser);
 });
 
-router.post('/', guard.check(adminRole), (req, res) => {
+router.post('/',body('firstName').isLength({ min: 1 }), body('password').isLength({ min: 8 }), guard.check(adminRole), (req, res) => {
   const existingUser = userRepository.getUserByFirstName(req.body.firstName);
 
   if (existingUser) {
